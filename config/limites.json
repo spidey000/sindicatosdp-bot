@@ -1,0 +1,11 @@
+{
+  "fecha": null,
+  "busquedas_realizadas": 0,
+  "respuestas_enviadas": 0,
+  "max_busquedas_dia": 20,
+  "max_respuestas_dia": 10,
+  "max_respuestas_ejecucion": 3,
+  "max_por_usuario_dia": 1,
+  "historial_usuarios": {},
+  "ultima_ejecucion": null
+}
