@@ -78,7 +78,7 @@ def render(request: Request, template: str, **context):
     context.setdefault("config", load_config()["config"])
     context.setdefault("limits", load_config()["limits"])
     context.setdefault("path", request.url.path)
-    return templates.TemplateResponse(template, {"request": request, **context})
+    return templates.TemplateResponse(request, template, context)
 
 
 def parse_lines(value: str) -> list[str]:

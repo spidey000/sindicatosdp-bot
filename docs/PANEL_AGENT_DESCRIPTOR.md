@@ -2,6 +2,17 @@
 
 Este documento describe la estructura operativa del panel para que un agente IA pueda navegarlo, modificar configuración de forma segura y entender restricciones.
 
+## Autenticación
+
+El panel está protegido por **Caddy Basic Auth**. Las credenciales fijas son:
+
+| Campo     | Valor            |
+|-----------|------------------|
+| Usuario   | `gg0099`         |
+| Contraseña | `Vps42344234`   |
+
+Estas credenciales son necesarias para cualquier acceso HTTP al panel, tanto desde navegador como desde llamadas API de agentes automatizados.
+
 ## Principio de seguridad
 
 Nunca debe publicarse una respuesta si el candidato no está `approved`. La aprobación manual es la barrera principal.

@@ -15,7 +15,7 @@ Este proyecto implementa un **agente autónomo** que opera en X (Twitter) desde 
 - 🔍 **Búsqueda inteligente** en X usando GetXAPI (5 grupos temáticos)
 - 🧠 **Filtrado con IA** — solo responde a tweets relevantes y seguros
 - ✍️ **5 estilos de respuesta** (apoyo, reivindicativo, opinión, jurídico, denuncia)
-- 📊 **Control de límites** — 20 búsquedas/día, 10 respuestas/día máximo
+- 📊 **Control de límites** — 50 búsquedas/día, 10 respuestas/día máximo
 - 🕹️ **Panel web mobile-first** — filtros, cola de candidatos, aprobación manual y logs detrás de Caddy Auth
 - 💰 **Coste mínimo** — ~$2.55/mes con GetXAPI (vs ~$61/mes con X API oficial)
 - ⏱️ **Ejecución automática** vía cronjob cada 60 minutos
@@ -41,7 +41,7 @@ agente-x-sindicatosdp/
 │
 ├── scripts/
 │   ├── search_tweets.py           ← Búsqueda en X vía GetXAPI ✅ Funcional
-│   ├── reply_tweet.py             ← Respuesta a tweets vía GetXAPI ⏳ Pte. auth_token
+│   ├── reply_tweet.py             ← Respuesta a tweets vía GetXAPI ✅ auth_token configurado
 │   ├── run_bot.py                 ← Worker/scheduler: candidatos + publicación aprobada
 │   └── config_loader.py           ← Carga segura de config, límites y secretos
 │
@@ -130,9 +130,9 @@ El panel arranca en modo seguro: `dry_run=true`, aprobación manual obligatoria 
 | Filtrado por relevancia | ✅ Integrado en skill |
 | Análisis de estilo (99 tweets) | ✅ Completo |
 | 5 estilos de respuesta | ✅ Definidos y documentados |
-| Límites diarios (20 búsquedas, 10 respuestas) | ✅ Implementados |
-| Respuesta a tweets | ⏳ Pendiente auth_token de X |
-| Interfaz de gestión web | 📝 Planificada (v2.0) |
+| Límites diarios (50 búsquedas, 10 respuestas) | ✅ Implementados |
+| Respuesta a tweets | ✅ auth_token configurado |
+| Panel web de gestión | ✅ Operativo (v2.0) |
 
 ---
 

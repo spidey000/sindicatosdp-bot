@@ -238,9 +238,14 @@ def get_secret_status() -> dict[str, dict[str, Any]]:
     load_env_file()
     base_url = os.environ.get("GETXAPI_BASE_URL", "https://api.getxapi.com")
     username = os.environ.get("X_USERNAME", "sindicatosdpMAD")
+    deepseek_base_url = os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
+    deepseek_model = os.environ.get("DEEPSEEK_MODEL", "deepseek-v4-flash")
     return {
         "GETXAPI_KEY": {"configured": bool(os.environ.get("GETXAPI_KEY")), "value": "********" if os.environ.get("GETXAPI_KEY") else ""},
         "X_AUTH_TOKEN": {"configured": bool(os.environ.get("X_AUTH_TOKEN")), "value": "********" if os.environ.get("X_AUTH_TOKEN") else ""},
         "GETXAPI_BASE_URL": {"configured": bool(base_url), "value": base_url},
         "X_USERNAME": {"configured": bool(username), "value": username},
+        "DEEPSEEK_API_KEY": {"configured": bool(os.environ.get("DEEPSEEK_API_KEY")), "value": "********" if os.environ.get("DEEPSEEK_API_KEY") else ""},
+        "DEEPSEEK_BASE_URL": {"configured": bool(deepseek_base_url), "value": deepseek_base_url},
+        "DEEPSEEK_MODEL": {"configured": bool(deepseek_model), "value": deepseek_model},
     }

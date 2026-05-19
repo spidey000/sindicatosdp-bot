@@ -412,13 +412,14 @@ Los contadores se reinician automáticamente al cambiar la fecha.
 
 ### 8.3. Costes de API de X
 
-| Recurso | Límite Free | Uso diario estimado | Consumo mensual |
-|---------|-------------|---------------------|-----------------|
-| Posts (tweets + replies) | 1,500/mes | 10 respuestas | ~300/mes (✅) |
-| Búsquedas (search recent) | 500/mes | 20 búsquedas | ~600/mes (⚠️ excede) |
-| Lectura de timeline | 100,000/mes | ~20/día | ~600/mes (✅) |
+| Recurso | Precio GetXAPI | Uso diario estimado | Coste mensual |
+|---------|----------------|---------------------|---------------|
+| Posts (tweets + replies) | $0.002/call | 10 respuestas | ~$0.60/mes |
+| Búsquedas (search recent) | $0.001/call | 50 búsquedas | ~$1.50/mes |
+| Lectura de timeline | $0.001/call | ~20/día | ~$0.60/mes |
+| **Total estimado** | | | **~$2.70/mes** |
 
-> ⚠️ Las búsquedas están al límite. Si el bot busca más de 16 veces al día, se necesitará el plan Basic ($100/mes).
+> 📌 Al usar GetXAPI en lugar de la API oficial de X, no hay límites de plan Free que nos afecten. El coste es puramente por consumo.
 
 ---
 

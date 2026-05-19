@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import time
 from datetime import datetime, timedelta, timezone
@@ -13,7 +14,7 @@ import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from scripts.config_loader import load_config, get_secret_status
+from scripts.config_loader import load_config, get_secret_status, load_prompts
 from scripts.reply_tweet import reply_to_tweet
 from scripts.search_tweets import (
     build_account_query,
@@ -66,11 +67,93 @@ def matched_terms(text, cfg):
     return keywords, topics
 
 
-def draft_reply(tweet, keywords, topics):
-    topic = topics[0] if topics else (keywords[0] if keywords else "este asunto")
+ALLOWED_AI_CATEGORIES = {"apoyo", "reivindicativo", "opinion", "juridico", "denuncia", "no_relevante"}
+
+
+def _parse_generated_reply(raw: str) -> tuple[str, str]:
+    """Parsea la respuesta estructurada del LLM.
+
+    Formato esperado:
+      CATEGORÍA: apoyo|reivindicativo|opinion|juridico|denuncia|no_relevante
+      RESPUESTA: texto
+    """
+    category = "unknown"
+    reply = ""
+    category_match = re.search(r"CATEGOR[IÍ]A\s*:\s*([^\n\r]+)", raw, flags=re.IGNORECASE)
+    if category_match:
+        category = category_match.group(1).strip().lower().replace("í", "i")
+        category = re.sub(r"[^a-z_]+", "", category)
+    if category not in ALLOWED_AI_CATEGORIES:
+        category = "unknown"
+
+    reply_match = re.search(r"RESPUESTA\s*:\s*(.*)", raw, flags=re.IGNORECASE | re.DOTALL)
+    if reply_match:
+        reply = reply_match.group(1).strip().strip('"')
+    if category == "no_relevante":
+        reply = ""
+    return category, reply
+
+
+def generate_reply(tweet, keywords, topics) -> tuple[str, str]:
+    """Genera categoría y borrador de respuesta con DeepSeek.
+
+    Si la API falla o no está configurada, devuelve una respuesta vacía para que
+    el candidato quede creado pero pendiente de edición manual.
+    """
+    api_key = os.environ.get("DEEPSEEK_API_KEY")
+    if not api_key:
+        return "unknown", ""
+
+    text = tweet_text(tweet)
     user = tweet_username(tweet)
-    prefix = f"@{user} " if user else ""
-    return f"{prefix}lo revisamos. En {topic} conviene mirar bien el contexto antes de sacar conclusiones."
+    prompts = load_prompts()
+    system_content = "\n\n".join(
+        part.strip()
+        for part in [
+            prompts.get("system_prompt", ""),
+            prompts.get("respuesta_estilo", ""),
+            prompts.get("safety", ""),
+        ]
+        if part and part.strip()
+    )
+    user_content = f"""Categoriza y genera una respuesta sugerida para este tweet.
+
+Tweet original:
+{text}
+
+Usuario autor: @{user or 'desconocido'}
+Keywords detectados: {', '.join(keywords) if keywords else 'ninguno'}
+Topics detectados: {', '.join(topics) if topics else 'ninguno'}
+
+Instrucciones de relevancia:
+{prompts.get('filtro_relevancia', '').strip()}
+
+Devuelve SOLO este formato:
+CATEGORÍA: apoyo|reivindicativo|opinion|juridico|denuncia|no_relevante
+RESPUESTA: texto de respuesta o vacío si no_relevante
+"""
+    try:
+        from openai import OpenAI
+
+        client = OpenAI(
+            api_key=api_key,
+            base_url=os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
+            timeout=30,
+        )
+        response = client.chat.completions.create(
+            model=os.environ.get("DEEPSEEK_MODEL", "deepseek-v4-flash"),
+            messages=[
+                {"role": "system", "content": system_content},
+                {"role": "user", "content": user_content},
+            ],
+            temperature=0.55,
+            max_tokens=700,
+        )
+        raw = response.choices[0].message.content or ""
+        return _parse_generated_reply(raw)
+    except Exception as exc:
+        log_activity({"accion": "ai_reply_error", "resultado": str(exc)[:500]})
+        return "unknown", ""
 
 
 def collect_candidates(cfg):
@@ -100,6 +183,9 @@ def collect_candidates(cfg):
                 if not tweet_id or not text:
                     continue
                 keywords, topics = matched_terms(text, cfg)
+                ai_category, reply_text = generate_reply(tweet, keywords, topics)
+                metadata = dict(tweet)
+                metadata["ai_generation"] = {"category": ai_category, "model": os.environ.get("DEEPSEEK_MODEL", "deepseek-v4-flash")}
                 if upsert_candidate(
                     conn,
                     tweet_id=tweet_id,
@@ -107,8 +193,8 @@ def collect_candidates(cfg):
                     content=text,
                     query=query,
                     source=source,
-                    reply_text=draft_reply(tweet, keywords, topics),
-                    metadata=tweet,
+                    reply_text=reply_text,
+                    metadata=metadata,
                     matched_keywords=keywords,
                     matched_topics=topics,
                 ):

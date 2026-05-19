@@ -19,7 +19,7 @@
 - [x] Reglas de estilo (sin hashtags, sin emojis, tono humano)
 
 ### Límites y control
-- [x] Contadores diarios (20 búsquedas, 10 respuestas)
+- [x] Contadores diarios (50 búsquedas, 10 respuestas)
 - [x] Reinicio automático de contadores
 - [x] Historial de usuarios respondidos
 

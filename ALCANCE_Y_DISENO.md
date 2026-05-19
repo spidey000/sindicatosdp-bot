@@ -473,7 +473,7 @@ Basado en el plan **Free** de X API:
 | Búsquedas | 500 / mes (≈16/día) | Gratuito |
 | Lectura de timeline | 100,000 / mes | Gratuito |
 
-Con nuestros límites por defecto (20 búsquedas/día, 10 respuestas/día) estamos muy por debajo.
+Con nuestros límites por defecto (50 búsquedas/día, 10 respuestas/día) estamos muy por debajo.
 
 > 📌 **Nota:** Si el proyecto crece, se puede migrar al plan **Basic** ($100/mes) que permite 300,000 posts/mes y 50,000 búsquedas/mes.
 
