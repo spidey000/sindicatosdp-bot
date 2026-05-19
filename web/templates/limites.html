@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="post" class="stack">
+  <article class="card">
+    <h2>Límites diarios</h2>
+    {% for key in ['max_busquedas_dia','max_respuestas_dia','max_respuestas_ejecucion','max_por_usuario_dia'] %}
+      <label>{{ key }} <input type="number" name="{{ key }}" value="{{ limits.get(key, 0) }}"></label>
+    {% endfor %}
+    <label>max_tweet_age_days <input type="number" name="max_tweet_age_days" value="{{ config.reply.max_tweet_age_days or 7 }}"></label>
+  </article>
+  <article class="card">
+    <h2>Seguridad de publicación</h2>
+    <label><input type="checkbox" name="dry_run" {{ 'checked' if config.reply.dry_run }}> Dry run: no publicar nunca</label>
+    <label><input type="checkbox" name="manual_approval_required" {{ 'checked' if config.reply.manual_approval_required }}> Aprobación manual obligatoria</label>
+    <label><input type="checkbox" name="auto_reply_enabled" {{ 'checked' if config.reply.auto_reply_enabled }}> Publicar aprobadas automáticamente</label>
+  </article>
+  <button class="button primary" type="submit">Guardar límites</button>
+</form>
+{% endblock %}

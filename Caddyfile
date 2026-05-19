@@ -1,0 +1,22 @@
+:80 {
+  # Panel de control protegido por Caddy Auth.
+  # Genera el hash con: docker run --rm -it caddy:2 caddy hash-password
+  # Define CADDY_AUTH_USER y CADDY_AUTH_HASH en .env antes de exponer el panel.
+  basic_auth /* {
+    {$CADDY_AUTH_USER} {$CADDY_AUTH_HASH}
+  }
+
+  reverse_proxy panel:8000 {
+    # Cabeceras internas para auditoría básica dentro de la app.
+    header_up Remote-User {$CADDY_AUTH_USER}
+    header_up X-Forwarded-User {$CADDY_AUTH_USER}
+  }
+
+  header {
+    X-Content-Type-Options nosniff
+    X-Frame-Options DENY
+    Referrer-Policy no-referrer
+    Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    Content-Security-Policy "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; frame-ancestors 'none'"
+  }
+}

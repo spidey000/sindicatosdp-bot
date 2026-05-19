@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<article class="card">
+  <h2>Estado</h2>
+  <div class="kv"><span>Pausado</span><b>{{ 'sí' if scheduler.get('paused') else 'no' }}</b></div>
+  <div class="kv"><span>Última ejecución</span><b>{{ scheduler.get('last_run_at') or 'nunca' }}</b></div>
+  <div class="kv"><span>Próxima ejecución</span><b>{{ scheduler.get('next_run_at') or 'sin datos' }}</b></div>
+  <div class="kv"><span>Último estado</span><b>{{ scheduler.get('last_status') or 'sin datos' }}</b></div>
+  <div class="actions-row">
+    <form method="post" action="/scheduler/pause"><button class="button danger">Pausar</button></form>
+    <form method="post" action="/scheduler/resume"><button class="button secondary">Reanudar</button></form>
+    <form method="post" action="/run/search"><button class="button primary">Ejecutar ahora</button></form>
+  </div>
+</article>
+<form method="post" class="card">
+  <h2>Programación</h2>
+  <label><input type="checkbox" name="enabled" {{ 'checked' if config.scheduler.enabled }}> Scheduler activo</label>
+  <label>Intervalo minutos <input type="number" name="interval_minutes" value="{{ config.scheduler.interval_minutes }}"></label>
+  <label><input type="checkbox" name="run_on_startup" {{ 'checked' if config.scheduler.run_on_startup }}> Ejecutar al arrancar</label>
+  <button class="button primary" type="submit">Guardar scheduler</button>
+</form>
+<a class="button secondary" href="/limites">Editar límites y modo seguro</a>
+{% endblock %}

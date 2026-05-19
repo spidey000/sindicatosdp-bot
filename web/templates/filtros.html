@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="post" class="stack">
+  <article class="card">
+    <h2>Búsqueda</h2>
+    <label><input type="checkbox" name="enabled" {{ 'checked' if config.search.enabled }}> Búsqueda activa</label>
+    <label>Idioma <input name="language" value="{{ config.search.language }}"></label>
+    <label>Producto GetXAPI <input name="default_product" value="{{ config.search.default_product }}"></label>
+    <label>Máx resultados/query <input type="number" name="max_results_per_query" value="{{ config.search.max_results_per_query }}"></label>
+    <label>Máx resultados/cuenta <input type="number" name="max_account_results" value="{{ config.search.max_account_results }}"></label>
+    <label><input type="checkbox" name="include_retweets" {{ 'checked' if config.search.include_retweets }}> Incluir retweets</label>
+  </article>
+
+  <article class="card">
+    <h2>Keywords</h2>
+    <textarea name="keywords" rows="8">{{ config.search.keywords|join('\n') }}</textarea>
+  </article>
+
+  <article class="card">
+    <h2>Temas</h2>
+    {% for topic in config.search.topics %}
+      <div class="topic-box">
+        <input name="topic_name" value="{{ topic.name if topic.name is defined else topic }}" placeholder="Nombre del tema">
+        <select name="topic_priority">
+          {% set pr = topic.priority if topic.priority is defined else 'medium' %}
+          {% for p in ['high','medium','low'] %}<option value="{{ p }}" {{ 'selected' if pr == p }}>{{ p }}</option>{% endfor %}
+        </select>
+        <textarea name="topic_terms" rows="3">{{ (topic.terms if topic.terms is defined else [topic])|join('\n') }}</textarea>
+      </div>
+    {% endfor %}
+    <div class="topic-box">
+      <input name="topic_name" placeholder="Nuevo tema">
+      <select name="topic_priority"><option>medium</option><option>high</option><option>low</option></select>
+      <textarea name="topic_terms" rows="3" placeholder="término 1&#10;término 2"></textarea>
+    </div>
+  </article>
+
+  <article class="card"><h2>Cuentas preferidas</h2><textarea name="preferred_accounts" rows="7">{{ config.search.preferred_accounts|join('\n') }}</textarea></article>
+  <article class="card"><h2>Cuentas bloqueadas</h2><textarea name="blocked_accounts" rows="5">{{ config.search.blocked_accounts|join('\n') }}</textarea></article>
+  <article class="card"><h2>Palabras excluidas</h2><textarea name="excluded_words" rows="5">{{ config.search.excluded_words|join('\n') }}</textarea></article>
+  <article class="card"><h2>Frases excluidas</h2><textarea name="excluded_phrases" rows="5">{{ config.search.excluded_phrases|join('\n') }}</textarea></article>
+  <article class="card"><h2>Términos requeridos opcionales</h2><textarea name="required_any_terms" rows="4">{{ config.search.required_any_terms|join('\n') }}</textarea></article>
+  <article class="card"><h2>Términos para cuentas preferidas</h2><textarea name="account_query_terms" rows="5">{{ config.search.account_query_terms|join('\n') }}</textarea></article>
+  <button class="button primary sticky-submit" type="submit">Guardar filtros</button>
+</form>
+{% endblock %}

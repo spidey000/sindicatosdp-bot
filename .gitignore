@@ -12,11 +12,14 @@ auth_token.txt
 # ==========================================
 data/tweets_all.json
 data/tweets_api.json
+data/*.sqlite
+data/*.sqlite-*
 
 # ==========================================
 # Logs
 # ==========================================
 logs/*.log
+config/backups/
 
 # ==========================================
 # Python

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="tabs">
+  {% for s in ['pending','approved','published','rejected','error','all'] %}
+    <a class="{{ 'active' if active_status == s else '' }}" href="/cola?status={{ s }}">{{ s }}</a>
+  {% endfor %}
+</div>
+
+{% for c in candidates %}
+  <article class="card candidate">
+    <div class="row between"><strong>@{{ c.username or 'sin_usuario' }}</strong><span class="badge">{{ c.status }}</span></div>
+    <p>{{ c.content[:240] }}</p>
+    <div class="chips">
+      {% for k in c.matched_keywords or [] %}<span>{{ k }}</span>{% endfor %}
+      {% for t in c.matched_topics or [] %}<span>{{ t }}</span>{% endfor %}
+    </div>
+    <a class="button primary" href="/candidatos/{{ c.id }}">Revisar</a>
+  </article>
+{% else %}
+  <article class="card"><p class="muted">No hay candidatos en este estado.</p></article>
+{% endfor %}
+{% endblock %}

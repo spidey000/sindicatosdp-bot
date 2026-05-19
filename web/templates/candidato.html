@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<article class="card">
+  <div class="row between"><strong>@{{ candidate.username or 'sin_usuario' }}</strong><span class="badge">{{ candidate.status }}</span></div>
+  {% if candidate.tweet_url %}<a href="{{ candidate.tweet_url }}" target="_blank" rel="noreferrer">Abrir tweet</a>{% endif %}
+  <h2>Tweet original</h2>
+  <p class="tweet-text">{{ candidate.content }}</p>
+  <h2>Motivos</h2>
+  <div class="chips">
+    {% for k in candidate.matched_keywords or [] %}<span>{{ k }}</span>{% endfor %}
+    {% for t in candidate.matched_topics or [] %}<span>{{ t }}</span>{% endfor %}
+  </div>
+</article>
+
+<article class="card sticky-actions-card">
+  <h2>Respuesta propuesta</h2>
+  <form method="post" action="/candidatos/{{ candidate.id }}/edit">
+    <textarea name="reply_text" rows="7">{{ candidate.edited_reply_text or candidate.reply_text }}</textarea>
+    <button class="button secondary" type="submit">Guardar edición</button>
+  </form>
+  <form method="post" action="/candidatos/{{ candidate.id }}/approve">
+    <textarea name="reply_text" rows="7">{{ candidate.edited_reply_text or candidate.reply_text }}</textarea>
+    <button class="button primary danger-safe" type="submit">Aprobar para publicar</button>
+  </form>
+  <form method="post" action="/candidatos/{{ candidate.id }}/reject" class="inline-form">
+    <input name="reason" placeholder="Motivo opcional">
+    <button class="button danger" type="submit">Rechazar</button>
+  </form>
+</article>
+
+<article class="card">
+  <h2>Auditoría</h2>
+  {% for a in audit %}<p class="logline">{{ a.created_at }} · {{ a.action }} · {{ a.details or '' }}</p>{% else %}<p class="muted">Sin eventos.</p>{% endfor %}
+</article>
+{% endblock %}

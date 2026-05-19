@@ -1,0 +1,55 @@
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    environment:
+      CADDY_AUTH_USER: "${CADDY_AUTH_USER:?CADDY_AUTH_USER no definido en .env}"
+      CADDY_AUTH_HASH: "${CADDY_AUTH_HASH:?CADDY_AUTH_HASH no definido en .env}"
+    ports:
+      - "${PANEL_PORT:-8080}:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - panel
+    networks:
+      - internal
+
+  panel:
+    build: .
+    restart: unless-stopped
+    command: bash /app/run_web.sh
+    env_file:
+      - .env
+    environment:
+      REQUIRE_PROXY_AUTH_HEADER: "${REQUIRE_PROXY_AUTH_HEADER:-false}"
+      REMOTE_USER_HEADER: "${REMOTE_USER_HEADER:-Remote-User}"
+    volumes:
+      - ./config:/app/config
+      - ./data:/app/data
+      - ./logs:/app/logs
+    expose:
+      - "8000"
+    networks:
+      - internal
+
+  worker:
+    build: .
+    restart: unless-stopped
+    command: python scripts/run_bot.py --worker
+    env_file:
+      - .env
+    volumes:
+      - ./config:/app/config
+      - ./data:/app/data
+      - ./logs:/app/logs
+    networks:
+      - internal
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+networks:
+  internal:

@@ -16,6 +16,7 @@ Este proyecto implementa un **agente autónomo** que opera en X (Twitter) desde 
 - 🧠 **Filtrado con IA** — solo responde a tweets relevantes y seguros
 - ✍️ **5 estilos de respuesta** (apoyo, reivindicativo, opinión, jurídico, denuncia)
 - 📊 **Control de límites** — 20 búsquedas/día, 10 respuestas/día máximo
+- 🕹️ **Panel web mobile-first** — filtros, cola de candidatos, aprobación manual y logs detrás de Caddy Auth
 - 💰 **Coste mínimo** — ~$2.55/mes con GetXAPI (vs ~$61/mes con X API oficial)
 - ⏱️ **Ejecución automática** vía cronjob cada 60 minutos
 
@@ -40,7 +41,15 @@ agente-x-sindicatosdp/
 │
 ├── scripts/
 │   ├── search_tweets.py           ← Búsqueda en X vía GetXAPI ✅ Funcional
-│   └── reply_tweet.py             ← Respuesta a tweets vía GetXAPI ⏳ Pte. auth_token
+│   ├── reply_tweet.py             ← Respuesta a tweets vía GetXAPI ⏳ Pte. auth_token
+│   ├── run_bot.py                 ← Worker/scheduler: candidatos + publicación aprobada
+│   └── config_loader.py           ← Carga segura de config, límites y secretos
+│
+├── web/
+│   ├── app.py                     ← Panel FastAPI mobile-first
+│   ├── db.py                      ← SQLite: candidatos, auditoría y scheduler
+│   ├── templates/                 ← Pantallas del panel
+│   └── static/                    ← CSS responsive
 │
 ├── data/
 │   ├── tweets_all.json            ← 99 tweets extraídos (análisis de estilo)
@@ -52,8 +61,14 @@ agente-x-sindicatosdp/
 ├── logs/
 │   └── actividad.log              ← Registro de actividad del bot
 │
-└── config/
-    └── limites.json               ← Configuración de límites diarios
+├── config/
+│   ├── bot_config.json            ← Filtros, scheduler y modo seguro
+│   ├── limites.json               ← Configuración de límites diarios
+│   └── prompts/                   ← Prompts editables desde el panel
+│
+├── Dockerfile
+├── docker-compose.yml
+└── Caddyfile                      ← Reverse proxy + Basic Auth
 ```
 
 ---
@@ -75,6 +90,23 @@ python3 scripts/search_tweets.py
 # 4. Probar menciones
 python3 scripts/search_tweets.py --mentions
 ```
+
+### Panel Docker + Caddy Auth
+
+```bash
+cp .env.example .env
+# Completa GETXAPI_KEY, X_AUTH_TOKEN, CADDY_AUTH_USER y CADDY_AUTH_HASH
+docker run --rm -it caddy:2 caddy hash-password
+docker compose up -d --build
+```
+
+Abre:
+
+```text
+http://IP_DEL_SERVIDOR:8080
+```
+
+El panel arranca en modo seguro: `dry_run=true`, aprobación manual obligatoria y publicación automática desactivada.
 
 > 📖 Consulta [docs/INSTALL.md](docs/INSTALL.md) para la guía completa de instalación.
 
@@ -114,6 +146,9 @@ python3 scripts/search_tweets.py --mentions
 | [CONFIGURATION.md](docs/CONFIGURATION.md) | Keywords, límites, temas configurables |
 | [OPERATION.md](docs/OPERATION.md) | Cómo opera, logs y monitorización |
 | [FUTURE.md](docs/FUTURE.md) | Funcionalidades planificadas (incluye interfaz de gestión) |
+| [PANEL.md](docs/PANEL.md) | Uso del panel web, pantallas y flujo de aprobación |
+| [DOCKER_CADDY.md](docs/DOCKER_CADDY.md) | Despliegue Docker con Caddy Auth |
+| [PANEL_AGENT_DESCRIPTOR.md](docs/PANEL_AGENT_DESCRIPTOR.md) | Descriptor para agentes IA |
 
 ---
 

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+{% for name, content in prompts.items() %}
+  <article class="card">
+    <h2>{{ name }}</h2>
+    <form method="post" action="/prompts/{{ name }}">
+      <textarea name="content" rows="12">{{ content }}</textarea>
+      <button class="button primary" type="submit">Guardar {{ name }}</button>
+    </form>
+  </article>
+{% endfor %}
+{% endblock %}

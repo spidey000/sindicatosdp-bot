@@ -1,0 +1,72 @@
+{
+  "search": {
+    "enabled": true,
+    "language": "es",
+    "include_retweets": false,
+    "max_results_per_query": 20,
+    "max_account_results": 5,
+    "default_product": "Latest",
+    "keywords": [
+      "huelga",
+      "servicios mínimos",
+      "trabajadores",
+      "derecho de huelga",
+      "sindicato",
+      "SAERCO",
+      "aena",
+      "controladores",
+      "handling",
+      "plataforma"
+    ],
+    "topics": [
+      {
+        "name": "Derecho de huelga",
+        "priority": "high",
+        "terms": ["huelga", "servicios mínimos", "derecho de huelga"]
+      },
+      {
+        "name": "Condiciones laborales",
+        "priority": "high",
+        "terms": ["turnos", "descansos", "salarios", "jornada"]
+      },
+      {
+        "name": "Sector aeroportuario",
+        "priority": "medium",
+        "terms": ["Aena", "Barajas", "handling", "controladores"]
+      }
+    ],
+    "preferred_accounts": [
+      "USCAnet",
+      "controladores",
+      "SAERCO_ANS",
+      "aena",
+      "hosteltur",
+      "transportesgob",
+      "instrabajoyss",
+      "FSCdeCCOO",
+      "aereoccoo"
+    ],
+    "blocked_accounts": [],
+    "excluded_words": ["sorteo", "crypto", "apuesta", "onlyfans"],
+    "excluded_phrases": [],
+    "required_any_terms": [],
+    "account_query_terms": ["huelga", "sindicato", "trabajadores", "laboral", "derechos"]
+  },
+  "reply": {
+    "dry_run": true,
+    "manual_approval_required": true,
+    "auto_reply_enabled": false
+  },
+  "scheduler": {
+    "enabled": true,
+    "interval_minutes": 60,
+    "run_on_startup": false
+  },
+  "ui": {
+    "timezone": "Europe/Madrid"
+  },
+  "web": {
+    "require_proxy_auth_header": false,
+    "remote_user_header": "REMOTE_USER"
+  }
+}

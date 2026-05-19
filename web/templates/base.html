@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <title>{{ title or 'Panel @sindicatosdpMAD' }}</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Panel de control</p>
+      <h1>{{ title or 'Dashboard' }}</h1>
+    </div>
+    <span class="status-pill">Caddy Auth</span>
+  </header>
+
+  <main class="container">
+    {% if request.query_params.get('saved') %}
+      <div class="notice success">Cambios guardados.</div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <nav class="bottom-nav" aria-label="Navegación principal">
+    <a class="{{ 'active' if path == '/' else '' }}" href="/">Home</a>
+    <a class="{{ 'active' if path.startswith('/cola') or path.startswith('/candidatos') else '' }}" href="/cola">Cola</a>
+    <a class="{{ 'active' if path.startswith('/filtros') else '' }}" href="/filtros">Filtros</a>
+    <a class="{{ 'active' if path.startswith('/scheduler') or path.startswith('/limites') else '' }}" href="/scheduler">Auto</a>
+    <a class="{{ 'active' if path.startswith('/logs') else '' }}" href="/logs">Logs</a>
+  </nav>
+</body>
+</html>

@@ -20,6 +20,9 @@ import sys
 import os
 import requests
 from datetime import datetime
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 
 def load_config():
@@ -33,7 +36,7 @@ def load_config():
                 line = line.strip()
                 if line and not line.startswith("#") and "=" in line:
                     key, value = line.split("=", 1)
-                    os.environ.setdefault(key.strip(), value.strip())
+                    os.environ[key.strip()] = value.strip()
 
     api_key = os.environ.get("GETXAPI_KEY")
     auth_token = os.environ.get("X_AUTH_TOKEN")

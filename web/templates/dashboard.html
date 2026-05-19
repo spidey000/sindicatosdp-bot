@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="grid cards-2">
+  <article class="card hero">
+    <span class="label">Pendientes</span>
+    <strong>{{ counts.get('pending', 0) }}</strong>
+    <p>Respuestas esperando revisión manual.</p>
+    <a class="button primary" href="/cola?status=pending">Revisar cola</a>
+  </article>
+  <article class="card">
+    <span class="label">Estado worker</span>
+    <strong class="small-strong">{{ scheduler.get('last_status', 'sin datos') }}</strong>
+    <p>Última: {{ scheduler.get('last_run_at') or 'nunca' }}</p>
+    <form method="post" action="/run/search"><button class="button">Ejecutar ahora</button></form>
+  </article>
+</section>
+
+<section class="grid cards-3">
+  <article class="card"><span class="label">Aprobadas</span><strong>{{ counts.get('approved', 0) }}</strong></article>
+  <article class="card"><span class="label">Publicadas</span><strong>{{ counts.get('published', 0) }}</strong></article>
+  <article class="card"><span class="label">Errores</span><strong>{{ counts.get('error', 0) }}</strong></article>
+</section>
+
+<section class="card">
+  <h2>Modo de seguridad</h2>
+  <div class="kv"><span>Dry run</span><b>{{ 'activo' if config.reply.dry_run else 'inactivo' }}</b></div>
+  <div class="kv"><span>Aprobación manual</span><b>{{ 'obligatoria' if config.reply.manual_approval_required else 'desactivada' }}</b></div>
+  <div class="kv"><span>Auto publicación</span><b>{{ 'activa' if config.reply.auto_reply_enabled else 'bloqueada' }}</b></div>
+</section>
+
+<section class="card">
+  <h2>Secretos</h2>
+  {% for name, item in secrets.items() %}
+    <div class="kv"><span>{{ name }}</span><b>{{ 'OK' if item.configured else 'Falta' }}</b></div>
+  {% endfor %}
+  <a href="/secretos" class="button secondary">Ver estado censurado</a>
+</section>
+
+<section class="card">
+  <h2>Últimos candidatos</h2>
+  {% for c in latest %}
+    <a class="list-item" href="/candidatos/{{ c.id }}">
+      <span>@{{ c.username or 'sin_usuario' }}</span>
+      <small>{{ c.status }}</small>
+      <p>{{ c.content[:160] }}</p>
+    </a>
+  {% else %}
+    <p class="muted">Todavía no hay candidatos.</p>
+  {% endfor %}
+</section>
+{% endblock %}

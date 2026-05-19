@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<article class="card">
+  <h2>Auditoría</h2>
+  {% for a in audit %}<p class="logline">{{ a.created_at }} · {{ a.action }} · #{{ a.candidate_id or '-' }} · {{ a.details or '' }}</p>{% else %}<p class="muted">Sin auditoría.</p>{% endfor %}
+</article>
+<article class="card">
+  <h2>actividad.log</h2>
+  {% for line in log_lines %}<pre class="logline">{{ line }}</pre>{% else %}<p class="muted">Sin logs.</p>{% endfor %}
+</article>
+{% endblock %}
