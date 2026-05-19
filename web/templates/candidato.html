@@ -1,35 +1,63 @@
 {% extends "base.html" %}
 {% block content %}
-<article class="card">
-  <div class="row between"><strong>@{{ candidate.username or 'sin_usuario' }}</strong><span class="badge">{{ candidate.status }}</span></div>
-  {% if candidate.tweet_url %}<a href="{{ candidate.tweet_url }}" target="_blank" rel="noreferrer">Abrir tweet</a>{% endif %}
-  <h2>Tweet original</h2>
+{% set ai_category = candidate.metadata_json.get('ai_generation', {}).get('category') if candidate.metadata_json else none %}
+
+<article class="card candidate-hero">
+  <div class="row between gap-tight">
+    <div>
+      <span class="label">Revisión individual</span>
+      <h2>@{{ candidate.username or 'sin_usuario' }}</h2>
+    </div>
+    <span class="badge">{{ candidate.status }}</span>
+  </div>
+  <div class="meta-row">
+    {% if ai_category %}<span class="chip">{{ ai_category }}</span>{% endif %}
+    {% if candidate.source %}<span class="chip subtle">{{ candidate.source }}</span>{% endif %}
+    {% if candidate.created_at %}<span class="chip subtle">{{ candidate.created_at }}</span>{% endif %}
+    {% if candidate.tweet_url %}<a class="chip link-chip" href="{{ candidate.tweet_url }}" target="_blank" rel="noreferrer">Abrir tweet</a>{% endif %}
+  </div>
+  <h3>Tweet original</h3>
   <p class="tweet-text">{{ candidate.content }}</p>
-  <h2>Motivos</h2>
+  <h3>Motivos detectados</h3>
   <div class="chips">
     {% for k in candidate.matched_keywords or [] %}<span>{{ k }}</span>{% endfor %}
     {% for t in candidate.matched_topics or [] %}<span>{{ t }}</span>{% endfor %}
   </div>
+  {% if candidate.query %}<p class="muted compact-copy">Consulta: {{ candidate.query }}</p>{% endif %}
 </article>
 
 <article class="card sticky-actions-card">
-  <h2>Respuesta propuesta</h2>
-  <form method="post" action="/candidatos/{{ candidate.id }}/edit">
-    <textarea name="reply_text" rows="7">{{ candidate.edited_reply_text or candidate.reply_text }}</textarea>
+  <div class="section-head">
+    <div>
+      <span class="label">Respuesta propuesta</span>
+      <h2>Editar antes de aprobar</h2>
+    </div>
+    <span class="status-pill subtle">{{ 'edición previa' if candidate.edited_reply_text else 'propuesta IA' }}</span>
+  </div>
+  <form method="post" action="/candidatos/{{ candidate.id }}/edit" class="stack reply-form">
+    <label for="reply_text">Texto a publicar</label>
+    <textarea id="reply_text" name="reply_text" rows="8">{{ candidate.edited_reply_text or candidate.reply_text }}</textarea>
     <button class="button secondary" type="submit">Guardar edición</button>
   </form>
-  <form method="post" action="/candidatos/{{ candidate.id }}/approve">
-    <textarea name="reply_text" rows="7">{{ candidate.edited_reply_text or candidate.reply_text }}</textarea>
-    <button class="button primary danger-safe" type="submit">Aprobar para publicar</button>
-  </form>
-  <form method="post" action="/candidatos/{{ candidate.id }}/reject" class="inline-form">
-    <input name="reason" placeholder="Motivo opcional">
-    <button class="button danger" type="submit">Rechazar</button>
-  </form>
+  <div class="review-actions">
+    <form method="post" action="/candidatos/{{ candidate.id }}/approve" class="inline-form action-approve">
+      <button class="button primary danger-safe" type="submit">Aprobar para publicar</button>
+    </form>
+    <form method="post" action="/candidatos/{{ candidate.id }}/reject" class="inline-form action-reject">
+      <input name="reason" placeholder="Motivo opcional">
+      <button class="button danger" type="submit">Rechazar</button>
+    </form>
+  </div>
 </article>
 
 <article class="card">
   <h2>Auditoría</h2>
-  {% for a in audit %}<p class="logline">{{ a.created_at }} · {{ a.action }} · {{ a.details or '' }}</p>{% else %}<p class="muted">Sin eventos.</p>{% endfor %}
+  <div class="audit-list">
+    {% for a in audit %}
+      <p class="logline"><strong>{{ a.action }}</strong><span>{{ a.created_at }}</span><br>{{ a.details or '' }}</p>
+    {% else %}
+      <p class="muted">Sin eventos.</p>
+    {% endfor %}
+  </div>
 </article>
 {% endblock %}

@@ -1,22 +1,42 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="tabs">
+<section class="card queue-header">
+  <div class="section-head">
+    <div>
+      <span class="label">Revisión rápida</span>
+      <h2>Cola de candidatos</h2>
+    </div>
+    <a class="button secondary inline-cta" href="/">Dashboard</a>
+  </div>
+  <div class="tabs" aria-label="Filtrar candidatos por estado">
   {% for s in ['pending','approved','published','rejected','error','all'] %}
     <a class="{{ 'active' if active_status == s else '' }}" href="/cola?status={{ s }}">{{ s }}</a>
   {% endfor %}
-</div>
+  </div>
+</section>
 
-{% for c in candidates %}
-  <article class="card candidate">
-    <div class="row between"><strong>@{{ c.username or 'sin_usuario' }}</strong><span class="badge">{{ c.status }}</span></div>
-    <p>{{ c.content[:240] }}</p>
-    <div class="chips">
-      {% for k in c.matched_keywords or [] %}<span>{{ k }}</span>{% endfor %}
-      {% for t in c.matched_topics or [] %}<span>{{ t }}</span>{% endfor %}
-    </div>
-    <a class="button primary" href="/candidatos/{{ c.id }}">Revisar</a>
-  </article>
-{% else %}
-  <article class="card"><p class="muted">No hay candidatos en este estado.</p></article>
-{% endfor %}
+<section class="queue-list">
+  {% for c in candidates %}
+    {% set ai_category = c.metadata_json.get('ai_generation', {}).get('category') if c.metadata_json else none %}
+    <article class="card candidate {{ c.status }}">
+      <div class="row between gap-tight candidate-top">
+        <strong>@{{ c.username or 'sin_usuario' }}</strong>
+        <span class="badge">{{ c.status }}</span>
+      </div>
+      <div class="meta-row">
+        {% if ai_category %}<span class="chip">{{ ai_category }}</span>{% endif %}
+        {% if c.source %}<span class="chip subtle">{{ c.source }}</span>{% endif %}
+        {% if c.created_at %}<span class="chip subtle">{{ c.created_at }}</span>{% endif %}
+      </div>
+      <p class="tweet-preview">{{ c.content[:260] }}</p>
+      <div class="chips">
+        {% for k in c.matched_keywords or [] %}<span>{{ k }}</span>{% endfor %}
+        {% for t in c.matched_topics or [] %}<span>{{ t }}</span>{% endfor %}
+      </div>
+      <a class="button primary" href="/candidatos/{{ c.id }}">Revisar candidato</a>
+    </article>
+  {% else %}
+    <article class="card"><p class="muted">No hay candidatos en este estado.</p></article>
+  {% endfor %}
+</section>
 {% endblock %}

@@ -1,51 +1,74 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="grid cards-2">
-  <article class="card hero">
-    <span class="label">Pendientes</span>
-    <strong>{{ counts.get('pending', 0) }}</strong>
-    <p>Respuestas esperando revisión manual.</p>
-    <a class="button primary" href="/cola?status=pending">Revisar cola</a>
+<section class="dashboard-grid">
+  <article class="card hero dashboard-priority">
+    <span class="label">Cola de revisión</span>
+    <h2>{{ counts.get('pending', 0) }} candidatos pendientes</h2>
+    <p>Respuestas IA listas para aprobar, editar o rechazar sin perder contexto.</p>
+    <div class="stat-grid compact">
+      <div class="stat-chip"><strong>{{ counts.get('pending', 0) }}</strong><span>Pendientes</span></div>
+      <div class="stat-chip"><strong>{{ counts.get('approved', 0) }}</strong><span>Aprobadas</span></div>
+      <div class="stat-chip"><strong>{{ counts.get('published', 0) }}</strong><span>Publicadas</span></div>
+      <div class="stat-chip danger"><strong>{{ counts.get('error', 0) }}</strong><span>Errores</span></div>
+    </div>
+    <div class="actions-row">
+      <a class="button primary" href="/cola?status=pending">Abrir cola pendiente</a>
+      <a class="button secondary" href="/cola?status=all">Ver todo el histórico</a>
+    </div>
   </article>
+
+  <article class="card dashboard-worker">
+    <span class="label">Worker y automatización</span>
+    <div class="status-stack">
+      <strong class="small-strong">{{ scheduler.get('last_status', 'sin datos') }}</strong>
+      <p>Última ejecución: {{ scheduler.get('last_run_at') or 'nunca' }}</p>
+      <p class="muted">Próxima: {{ scheduler.get('next_run_at') or 'sin programar' }}</p>
+    </div>
+    <form method="post" action="/run/search">
+      <button class="button" type="submit">Ejecutar búsqueda ahora</button>
+    </form>
+  </article>
+</section>
+
+<section class="grid cards-2 dashboard-support">
   <article class="card">
-    <span class="label">Estado worker</span>
-    <strong class="small-strong">{{ scheduler.get('last_status', 'sin datos') }}</strong>
-    <p>Última: {{ scheduler.get('last_run_at') or 'nunca' }}</p>
-    <form method="post" action="/run/search"><button class="button">Ejecutar ahora</button></form>
+    <h2>Modo de seguridad</h2>
+    <div class="kv"><span>Dry run</span><b>{{ 'activo' if config.reply.dry_run else 'inactivo' }}</b></div>
+    <div class="kv"><span>Aprobación manual</span><b>{{ 'obligatoria' if config.reply.manual_approval_required else 'desactivada' }}</b></div>
+    <div class="kv"><span>Auto publicación</span><b>{{ 'activa' if config.reply.auto_reply_enabled else 'bloqueada' }}</b></div>
+  </article>
+
+  <article class="card">
+    <h2>Secretos</h2>
+    {% for name, item in secrets.items() %}
+      <div class="kv"><span>{{ name }}</span><b>{{ 'OK' if item.configured else 'Falta' }}</b></div>
+    {% endfor %}
+    <a href="/secretos" class="button secondary">Ver estado censurado</a>
   </article>
 </section>
 
-<section class="grid cards-3">
-  <article class="card"><span class="label">Aprobadas</span><strong>{{ counts.get('approved', 0) }}</strong></article>
-  <article class="card"><span class="label">Publicadas</span><strong>{{ counts.get('published', 0) }}</strong></article>
-  <article class="card"><span class="label">Errores</span><strong>{{ counts.get('error', 0) }}</strong></article>
-</section>
-
 <section class="card">
-  <h2>Modo de seguridad</h2>
-  <div class="kv"><span>Dry run</span><b>{{ 'activo' if config.reply.dry_run else 'inactivo' }}</b></div>
-  <div class="kv"><span>Aprobación manual</span><b>{{ 'obligatoria' if config.reply.manual_approval_required else 'desactivada' }}</b></div>
-  <div class="kv"><span>Auto publicación</span><b>{{ 'activa' if config.reply.auto_reply_enabled else 'bloqueada' }}</b></div>
-</section>
-
-<section class="card">
-  <h2>Secretos</h2>
-  {% for name, item in secrets.items() %}
-    <div class="kv"><span>{{ name }}</span><b>{{ 'OK' if item.configured else 'Falta' }}</b></div>
-  {% endfor %}
-  <a href="/secretos" class="button secondary">Ver estado censurado</a>
-</section>
-
-<section class="card">
-  <h2>Últimos candidatos</h2>
-  {% for c in latest %}
-    <a class="list-item" href="/candidatos/{{ c.id }}">
-      <span>@{{ c.username or 'sin_usuario' }}</span>
-      <small>{{ c.status }}</small>
-      <p>{{ c.content[:160] }}</p>
-    </a>
-  {% else %}
-    <p class="muted">Todavía no hay candidatos.</p>
-  {% endfor %}
+  <div class="section-head">
+    <h2>Últimos candidatos</h2>
+    <a href="/cola?status=pending">Ir a cola</a>
+  </div>
+  <div class="recent-list">
+    {% for c in latest %}
+      {% set ai_category = c.metadata_json.get('ai_generation', {}).get('category') if c.metadata_json else none %}
+      <a class="recent-item" href="/candidatos/{{ c.id }}">
+        <div class="row between gap-tight">
+          <strong>@{{ c.username or 'sin_usuario' }}</strong>
+          <span class="badge">{{ c.status }}</span>
+        </div>
+        <div class="meta-row">
+          {% if ai_category %}<span class="chip subtle">{{ ai_category }}</span>{% endif %}
+          {% if c.created_at %}<span class="chip subtle">{{ c.created_at }}</span>{% endif %}
+        </div>
+        <p>{{ c.content[:180] }}</p>
+      </a>
+    {% else %}
+      <p class="muted">Todavía no hay candidatos.</p>
+    {% endfor %}
+  </div>
 </section>
 {% endblock %}
